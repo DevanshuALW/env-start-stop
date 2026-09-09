@@ -1,0 +1,68 @@
+# Copy to terraform.tfvars and replace every YOUR-* value.
+# Do not commit terraform.tfvars (it can contain a Slack channel id).
+
+client_name    = "acme"
+name_prefix    = "acme-np-start-stop"
+environment    = "non-prod"
+aws_region     = "us-east-1"
+aws_account_id = "123456789012"
+slack_channel_id = "C0123456789"
+slack_commands   = ["/env-start-stop"]
+modal_title      = "Acme env start/stop"
+argocd_namespace = "argocd"
+rbac_group       = "start-stop-automation"
+schedule_timezone = "Asia/Calcutta"
+
+# Clusters the Lambda may call. key is what Slack stores.
+regions = [
+  {
+    key        = "use1"
+    label      = "Virginia (us-east-1)"
+    short_name = "Virginia"
+    aws_region = "us-east-1"
+    cluster    = "acme-nonprod-eks"
+  }
+]
+
+# One Slack row per namespace. parent = Argo app-of-apps. rds can be [].
+targets = [
+  {
+    key        = "use1:dev-app"
+    region_key = "use1"
+    namespace  = "dev-app"
+    parent     = "dev-root-app"
+    rds        = ["dev-app"]
+    apps       = ["dev-api", "dev-worker"]
+  },
+  {
+    key        = "use1:uat-app"
+    region_key = "use1"
+    namespace  = "uat-app"
+    parent     = "uat-root-app"
+    rds        = ["uat-app"]
+    apps       = ["uat-api", "uat-worker"]
+  }
+]
+
+# Pre-tick these when that region is selected.
+defaults = {
+  use1 = ["use1:dev-app"]
+}
+
+# IST-style night cycle. Set schedules = {} for Slack only.
+schedules = {
+  stop = {
+    cron   = "cron(0 23 * * ? *)"
+    action = "STOP"
+  }
+  start_rds = {
+    cron   = "cron(40 5 * * ? *)"
+    action = "START"
+    phase  = "rds"
+  }
+  start_apps = {
+    cron   = "cron(0 6 * * ? *)"
+    action = "START"
+    phase  = "apps"
+  }
+}

@@ -1,0 +1,24 @@
+# Apply once in the Argo CD namespace so the Lambda can pause/unpause Applications.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: env-start-stop
+  namespace: __ARGOCD_NAMESPACE__
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications"]
+    verbs: ["get", "list", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: env-start-stop
+  namespace: __ARGOCD_NAMESPACE__
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: env-start-stop
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: __RBAC_GROUP__

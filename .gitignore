@@ -1,0 +1,10 @@
+.terraform/
+.build/
+*.zip
+terraform.tfvars
+backend.tf
+tfplan
+crash.log
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
